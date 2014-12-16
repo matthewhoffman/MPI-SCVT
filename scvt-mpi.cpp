@@ -302,6 +302,8 @@ int writeRestartFileRetainTXT( const int it );
 double density(const pnt &p);
 double pop_lowres_density(const pnt &p);
 double pop_highres_density(const pnt &p);
+double south_pole_annulus_density(const pnt &p);
+double south_hemisphere_region_density(const pnt &p);
 double ellipse_density(const pnt &p, double lat_c, double lon_c, double lat_width, double lon_width);
 /*}}}*/
 
@@ -2983,7 +2985,15 @@ double density(const pnt &p){/*{{{*/
     // */
     
     // /* Pop high resolution density function. 
-    return pop_highres_density(p);
+//    return pop_highres_density(p);
+    // */
+
+    // /* South pole annulus density function for idealized land ice meshes
+    return south_pole_annulus_density(p);
+    // */
+
+    // /* South hemisphere-focused density function for generating regions for southern-hemisphere density functions
+    //return south_hemisphere_region_density(p);
     // */
 
 }/*}}}*/
@@ -3048,5 +3058,132 @@ double pop_highres_density(const pnt &p){/*{{{*/
     return density;
 }/*}}}*/
 /*}}}*/
+
+
+double south_pole_annulus_density(const pnt &p){
+    double dtr;
+    double density, lat;
+
+	double cellWidthLL, cellWidthML, cellWidthHL;
+	double densityLL, densityML, densityHL;
+	double minCellWidth;
+	double latStepFunction, lat_centLL, lat_centHL;
+	double widthLL, widthHL;
+	double dLat, dLatRadians;
+
+	dtr = M_PI/180.0;
+
+	//Here is the key to variable names:
+	//LL low latitude
+	//ML mid latitude
+	//HL high latitude
+
+	cellWidthLL = 1.0;
+	cellWidthML = 1.0;
+	cellWidthHL = 5.0;
+
+//	cellWidthLL = 100.0;
+//	cellWidthML = 10.0;
+//	cellWidthHL = 50.0;
+	minCellWidth = min(cellWidthLL, min(cellWidthML, cellWidthHL));
+
+	lat = p.getLat(); // Latitude of point to compute density for
+
+	dLat = 0.1;
+	dLatRadians = dLat*dtr;
+
+	latStepFunction = 59.0 * dtr; // Latitude to change from LL to HL function
+
+	lat_centLL = 45.0 * dtr; // In Radians - Position of center of transition region
+	lat_centHL = 70.0 * dtr; // In Radians - Position of center of transition region
+
+	widthLL = 10.0 * dtr; // In Radians - Width of transition region
+	widthHL = 10.0 * dtr; // In Radians - Width of transition region
+
+	densityLL = powf(minCellWidth/cellWidthLL, 4);
+	densityML = powf(minCellWidth/cellWidthML, 4);
+	densityHL = powf(minCellWidth/cellWidthHL, 4);
+
+//	if ( lat < latStepFunction) {
+//		density = ((densityLL-densityML) * (1.0 + tanh( (lat_centLL - fabs(lat))/ widthLL)) / 2.0) + densityML;
+//	} else if ( lat < 0.0){
+//        density = ((densityML-densityHL) * (1.0 + tanh( (lat_centHL - fabs(lat))/ widthHL)) / 2.0) + densityHL;
+//	} else {
+//        density = densityLL;
+//}
+  if ( lat < 0.0){
+	if ( fabs(lat) < latStepFunction) {
+		density = ((densityLL-densityML) * (1.0 + tanh( (lat_centLL - fabs(lat))/ widthLL)) / 2.0) + densityML;
+	} else {
+        density = ((densityML-densityHL) * (1.0 + tanh( (lat_centHL - fabs(lat))/ widthHL)) / 2.0) + densityHL;
+	}
+} else {
+ density = densityLL;
+}
+
+	return density;
+}
+
+
+double south_hemisphere_region_density(const pnt &p){
+    double dtr;
+    double density, lat;
+
+	double cellWidthLL, cellWidthML, cellWidthHL;
+	double densityLL, densityML, densityHL;
+	double minCellWidth;
+	double latStepFunction, lat_centLL, lat_centHL;
+	double widthLL, widthHL;
+	double dLat, dLatRadians;
+
+	dtr = M_PI/180.0;
+
+	//Here is the key to variable names:
+	//LL low latitude
+	//ML mid latitude
+	//HL high latitude
+
+	cellWidthLL = 15.0;
+	cellWidthML = 10.0;
+	cellWidthHL = 1.0;
+
+	minCellWidth = min(cellWidthLL, min(cellWidthML, cellWidthHL));
+
+	lat = p.getLat(); // Latitude of point to compute density for
+
+	dLat = 0.1;
+	dLatRadians = dLat*dtr;
+
+	latStepFunction = 45.0 * dtr; // Latitude to change from LL to HL function
+
+	lat_centLL = 30.0 * dtr; // In Radians - Position of center of transition region
+	lat_centHL = 60.0 * dtr; // In Radians - Position of center of transition region
+
+	widthLL = 20.0 * dtr; // In Radians - Width of transition region
+	widthHL = 20.0 * dtr; // In Radians - Width of transition region
+
+	densityLL = powf(minCellWidth/cellWidthLL, 4);
+	densityML = powf(minCellWidth/cellWidthML, 4);
+	densityHL = powf(minCellWidth/cellWidthHL, 4);
+
+//	if ( lat < latStepFunction) {
+//		density = ((densityLL-densityML) * (1.0 + tanh( (lat_centLL - fabs(lat))/ widthLL)) / 2.0) + densityML;
+//	} else if ( lat < 0.0){
+//        density = ((densityML-densityHL) * (1.0 + tanh( (lat_centHL - fabs(lat))/ widthHL)) / 2.0) + densityHL;
+//	} else {
+//        density = densityLL;
+//}
+  if ( lat < 0.0){
+	if ( fabs(lat) < latStepFunction) {
+		density = ((densityLL-densityML) * (1.0 + tanh( (lat_centLL - fabs(lat))/ widthLL) ) / 2.0) + densityML;
+	} else {
+        density = ((densityML-densityHL) * (1.0 + tanh( (lat_centHL - fabs(lat))/ widthHL)) / 2.0) + densityHL;
+	}
+} else {
+ density = densityLL;
+}
+
+	return density;
+}
 
 
