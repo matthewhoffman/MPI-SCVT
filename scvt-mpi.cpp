@@ -1135,8 +1135,10 @@ void makeMCPoints(int n){/*{{{*/
 	double dlon, dlat;
 	double dtr;
 	double lat, lon;
+	double latsp, lat2, lat3, lat4;
 	double x, y, z;
 	double dens_check, dens_comp;
+	double nfixed;
 	pnt p;
 	
 	dtr = M_PI/180.0;
@@ -1154,6 +1156,88 @@ void makeMCPoints(int n){/*{{{*/
 
 		points.push_back(p);
 	}
+
+
+	// */
+	 /* Uniform points in southern hemisphere
+	lat = -0.0 * dtr;
+//	latsp = -89.0 * dtr;
+	//4pir2
+//	nfixed = n/10;  // use 1/10 the points on the boundary
+//	nfixed = 700; // 700 boundary points is the approx. spacing for 1600 constant-density primary points w/ bdy along equator
+	nfixed = 50; 
+	dlon = 2.0*M_PI/nfixed;
+	j = 0;
+	for(i = 0; i <= nfixed; i++){
+		lon = i*dlon;
+		p = pntFromLatLon(lat,lon);
+		p.normalize();
+		p.idx = j;
+		p.isBdry = 1;
+		points.push_back(p);
+		j++;
+	}
+// Build second set above the first to create fixed triangles instead of fixed points
+	lat2 = lat + dlon * sqrt(3) / 2.0;  // offset vertically from the first row by amount needed to make equilateral triangles
+	for(i = 0; i <= nfixed; i++){
+		lon = i*dlon - dlon/2.0 ;  // horizontally offset by half an edge length
+		p = pntFromLatLon(lat2,lon);
+		p.normalize();
+		p.idx = j;
+		p.isBdry = 1;
+		points.push_back(p);
+		j++;
+	}
+// Build third set above the first to create fixed triangles instead of fixed points
+//	lat3 = lat + 2.0 * dlon * sqrt(3) / 2.0;  // offset vertically from the first row by amount needed to make two equilateral triangles
+//	for(i = 0; i <= nfixed; i++){
+//		lon = i*dlon;  // same spacing as original row
+//		p = pntFromLatLon(lat3,lon);
+//		p.normalize();
+//		p.idx = j;
+//		p.isBdry = 1;
+//		points.push_back(p);
+//		j++;
+//	}
+// Build fourth set above the first to create fixed triangles instead of fixed points
+//	lat4 = lat + 3.0 * dlon * sqrt(3) / 2.0;  // offset vertically from the first row by amount needed to make equilateral triangles
+//	for(i = 0; i < nfixed+1; i++){
+//		lon = i*dlon - dlon/2.0 ;  // horizontally offset by half an edge length
+//		p = pntFromLatLon(lat4,lon);
+//		p.normalize();
+//		p.idx = j;
+//		p.isBdry = 1;
+//		points.push_back(p);
+//		j++;
+//	}
+//	for(i = nfixed; i < n; i++){
+//		lon = drand48()*2*M_PI;
+//		lat = (drand48())*(lat-latsp) + latsp;
+//		p = pntFromLatLon(lat,lon);
+//		p.normalize();
+//		p.idx = j;
+//		p.isBdry = 0;
+//		points.push_back(p);
+//		j++;
+//	}
+
+//	for(i = nfixed; i < n; i++){
+	for(i = j; i < n; i++){
+
+		x = drand48()*2.0-1.0;
+		y = drand48()*2.0-1.0;
+		z = drand48()*-0.90 - 0.10;
+
+		p = pnt(x,y,z);
+		p.idx = j;
+		p.isBdry = 0;
+		p.normalize();
+		points.push_back(p);
+		j++;
+	}
+
+
+	// */
 
 	// */
 	/* Uniform points on equator between -20 and +20 latitude
