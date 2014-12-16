@@ -258,6 +258,7 @@ void readPoints();
 void makeMCPoints(int n);
 void makeGeneralizedSpiralPoints(int n);
 void makeFibonacciGridPoints(int n);
+void fixPoints(vector<pnt> &points);
 /*}}}*/
 /* ***** Integration Routines ***** {{{*/
 void divideIntegrate(const int levs, const pnt &A, const pnt &B, const pnt &C, pnt &Top, double &bot);
@@ -369,6 +370,9 @@ int main(int argc, char **argv){
 			pts_out << (*point_itr) << endl;
 		}
 		pts_out.close();
+
+		fixPoints(points);
+
 	}
 
 	// Each processor needs to setup the quadrature rules.
@@ -1369,6 +1373,22 @@ void makeFibonacciGridPoints(int n){/*{{{*/
 	}
 }/*}}}*/
 /*}}}*/
+
+void fixPoints(vector<pnt> &points){/*{{{*/
+	//Fix points based on some criteria.
+	//This is useful for doing a restart/bisection where we only want to mesh part of the sphere.
+	double dtr;
+#ifdef _DEBUG
+	cerr << "Fixing Points " << id << endl;
+#endif
+	dtr = M_PI/180.0;
+	for(point_itr = points.begin(); point_itr != points.end(); ++point_itr){
+		if ((*point_itr).getLat() > -50.0 * dtr)
+			(*point_itr).isBdry = 1
+			;
+	}
+}/*}}}*/
+
 /* ***** Integration Routines *****  {{{*/
 void divideIntegrate(const int levs, const pnt &A, const pnt &B, const pnt &C, pnt &Top, double &bot){/*{{{*/
 	//divideIntegrate integrates a triangle, with an arbitrary number of subdivisions.
