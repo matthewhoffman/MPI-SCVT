@@ -1,6 +1,6 @@
 CC = mpic++
-BDIR = /opt/local/boost_1_48_0-gcc
-NCDFDIR = /opt/local/netcdf-4.1.3-gcc
+BDIR = /Users/mhoffman/software/boost/boost_1_57_0_install
+NCDFDIR = /opt/local
 LIBS = -I${BDIR}/include/ -L${BDIR}/lib/ -lboost_mpi -lboost_serialization
 
 ifeq ($(NETCDF),yes)
@@ -16,7 +16,7 @@ TRISRC=Triangle/
 XMLSRC=Pugixml/
 
 PLATFORM=_MACOS
-PLATFORM=_LINUX
+#PLATFORM=_LINUX
 
 ifeq ($(PLATFORM),_LINUX)
 	FLAGS = -O3 -m64 -DLINUX $(NCDF_FLAGS)
